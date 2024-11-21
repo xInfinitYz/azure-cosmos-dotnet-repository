@@ -245,12 +245,10 @@ public class InMemoryRepositoryTests
             _invalidSerializableRepository.CreateAsync(invalidSerialisable).AsTask());
         Assert.True(InMemoryStorage.GetDictionary<InvalidSerialisable>().ContainsKey(invalidSerialisable.Id));
         Assert.Equal(args.Property1,
-            _invalidSerializableRepository
-                .DeserializeItem<ValidInvalidSerialisable>(
+            InMemoryRepository<InvalidSerialisable>.DeserializeItem<ValidInvalidSerialisable>(
                     InMemoryStorage.GetDictionary<InvalidSerialisable>()[invalidSerialisable.Id]).Property1);
         Assert.Equal(args.PartitionKey,
-            _invalidSerializableRepository
-                .DeserializeItem<ValidInvalidSerialisable>(
+            InMemoryRepository<InvalidSerialisable>.DeserializeItem<ValidInvalidSerialisable>(
                     InMemoryStorage.GetDictionary<InvalidSerialisable>()[invalidSerialisable.Id]).PartitionKey);
     }
 
@@ -361,12 +359,12 @@ public class InMemoryRepositoryTests
     public async Task CreateAsync_ManyItems_CreatesAllItems()
     {
         //Arrange
-        List<Person> items = new()
-        {
+        List<Person> items =
+        [
             new("joe") { Id = Guid.NewGuid().ToString(), Type = nameof(Person) },
             new("bill") { Id = Guid.NewGuid().ToString(), Type = nameof(Person) },
             new("fred") { Id = Guid.NewGuid().ToString(), Type = nameof(Person) },
-        };
+        ];
 
         //Act
         IEnumerable<Person> people = (await _personRepository.CreateAsync(items)).ToList();
@@ -394,12 +392,12 @@ public class InMemoryRepositoryTests
         CreateAsync_ManyItemsWhereOneHasIdThatAlreadyExists_CreatesInitalItemsThenThrowsCosmosException()
     {
         //Arrange
-        List<Person> items = new()
-        {
+        List<Person> items =
+        [
             new("joe") { Id = Guid.NewGuid().ToString(), Type = nameof(Person) },
             new("bill") { Id = Guid.NewGuid().ToString(), Type = nameof(Person) },
             new("fred") { Id = Guid.NewGuid().ToString(), Type = nameof(Person) },
-        };
+        ];
 
         Person badPerson = new("copy") { Id = items.First().Id, Type = nameof(Person) };
         items.Add(badPerson);
@@ -575,14 +573,14 @@ public class InMemoryRepositoryTests
     {
         //Arrange
         var originalEtag = Guid.NewGuid().ToString();
-        List<Person> items = new()
-        {
+        List<Person> items =
+        [
             new("joe") { Id = Guid.NewGuid().ToString(), Type = nameof(Person), Etag = originalEtag },
             new("bill") { Id = Guid.NewGuid().ToString(), Type = nameof(Person), Etag = originalEtag },
             new("fred") { Id = Guid.NewGuid().ToString(), Type = nameof(Person), Etag = originalEtag },
-        };
+        ];
 
-        List<Person> itemsUpdate = new();
+        List<Person> itemsUpdate = [];
 
         foreach (Person item in items)
         {
@@ -628,14 +626,14 @@ public class InMemoryRepositoryTests
     {
         //Arrange
         var originalEtag = Guid.NewGuid().ToString();
-        List<Person> items = new()
-        {
+        List<Person> items =
+        [
             new("joe") { Id = Guid.NewGuid().ToString(), Type = nameof(Person), Etag = originalEtag },
             new("bill") { Id = Guid.NewGuid().ToString(), Type = nameof(Person), Etag = originalEtag },
             new("fred") { Id = Guid.NewGuid().ToString(), Type = nameof(Person), Etag = originalEtag },
-        };
+        ];
 
-        List<Person> itemsUpdate = new();
+        List<Person> itemsUpdate = [];
 
         foreach (Person item in items)
         {
@@ -984,6 +982,36 @@ public class InMemoryRepositoryTests
         RootObject deserialisedItem =
             _rootObjectRepository.DeserializeItem(InMemoryStorage.GetDictionary<RootObject>().First().Value);
         Assert.Equal("CBA", deserialisedItem.Type1);
+        Assert.Equal("prop2", deserialisedItem.NestedObject.Property1);
+        Assert.Equal(2, deserialisedItem.NestedObject.Property2);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PropertiesInNestedObjectToPatch_UpdatesValues()
+    {
+        //Arrange
+        RootObject root = new()
+        {
+            Id = Guid.NewGuid().ToString(),
+            NestedObject = new NestedObject
+            {
+                Property1 = "prop1",
+                Property2 = 55
+            }
+        };
+
+        InMemoryStorage.GetDictionary<RootObject>().TryAddAsJson(root.Id, root);
+
+        //Act
+        await _rootObjectRepository.UpdateAsync(
+            root.Id,
+            builder =>
+                builder.Replace(x => x.NestedObject.Property1, "prop2")
+                    .Replace(x => x.NestedObject.Property2, 2));
+
+        //Assert
+        RootObject deserialisedItem =
+            _rootObjectRepository.DeserializeItem(InMemoryStorage.GetDictionary<RootObject>().First().Value);
         Assert.Equal("prop2", deserialisedItem.NestedObject.Property1);
         Assert.Equal(2, deserialisedItem.NestedObject.Property2);
     }
