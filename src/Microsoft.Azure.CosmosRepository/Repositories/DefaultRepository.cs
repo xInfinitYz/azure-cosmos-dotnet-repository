@@ -158,4 +158,9 @@ internal sealed partial class DefaultRepository<TItem>(
     {
         throw new NotImplementedException();
     }
+
+    ValueTask<string> IWriteOnlyRepository<TItem>.UpdateAsync(string id, Action<IPatchOperationBuilder<TItem>> builder, string partitionKeyValue, string? etag, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }
