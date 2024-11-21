@@ -53,45 +53,45 @@ internal sealed partial class DefaultRepository<TItem>
     }
 
     //TODO: Write docs
-    public async ValueTask UpdateAsync(string id,
+    public async ValueTask<string> UpdateAsync(string id,
         Action<IPatchOperationBuilder<TItem>> builder,
         string? etag = default,
         CancellationToken cancellationToken = default)
     {
-        await InternalUpdateAsync(id, builder, null, etag, cancellationToken);
+        return await InternalUpdateAsync(id, builder, null, etag, cancellationToken);
     }
 
     /// <inheritdoc/>
-    public async ValueTask UpdateAsync(string id,
+    public async ValueTask<string> UpdateAsync(string id,
         Action<IPatchOperationBuilder<TItem>> builder,
         string? partitionKeyValue,
         string? etag = default,
         CancellationToken cancellationToken = default)
     {
-        await InternalUpdateAsync(id, builder, BuildPartitionKey(partitionKeyValue, id), etag, cancellationToken);
+        return await InternalUpdateAsync(id, builder, BuildPartitionKey(partitionKeyValue, id), etag, cancellationToken);
     }
 
     //TODO: Write docs
-    public async ValueTask UpdateAsync(string id,
+    public async ValueTask<string> UpdateAsync(string id,
         IEnumerable<string> partitionKeyValues,
         Action<IPatchOperationBuilder<TItem>> builder,
         string? etag = default,
         CancellationToken cancellationToken = default)
     {
-        await InternalUpdateAsync(id, builder, BuildPartitionKey(partitionKeyValues, id), etag, cancellationToken);
+        return await InternalUpdateAsync(id, builder, BuildPartitionKey(partitionKeyValues, id), etag, cancellationToken);
     }
 
     //TODO: Write docs
-    public async ValueTask UpdateAsync(string id,
+    public async ValueTask<string> UpdateAsync(string id,
         PartitionKey partitionKey,
         Action<IPatchOperationBuilder<TItem>> builder,
         string? etag = null,
         CancellationToken cancellationToken = default)
     {
-        await InternalUpdateAsync(id, builder, partitionKey, etag, cancellationToken);
+        return await InternalUpdateAsync(id, builder, partitionKey, etag, cancellationToken);
     }
 
-    private async ValueTask InternalUpdateAsync(string id,
+    private async ValueTask<string> InternalUpdateAsync(string id,
         Action<IPatchOperationBuilder<TItem>> builder,
         PartitionKey? partitionKey = null,
         string? etag = default,
@@ -113,5 +113,7 @@ internal sealed partial class DefaultRepository<TItem>
 
         await container.PatchItemAsync<TItem>(id, partitionKey ?? new PartitionKey(id),
             patchOperationBuilder.PatchOperations, patchItemRequestOptions, cancellationToken);
+
+        return response.ETag;
     }
 }

@@ -84,17 +84,17 @@ internal partial class InMemoryRepository<TItem> : IRepository<TItem>
         throw new NotImplementedException();
     }
 
-    public ValueTask UpdateAsync(string id, Action<IPatchOperationBuilder<TItem>> builder, string? etag = null, CancellationToken cancellationToken = default)
+    public ValueTask<string> UpdateAsync(string id, Action<IPatchOperationBuilder<TItem>> builder, string? etag = null, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public ValueTask UpdateAsync(string id, Action<IPatchOperationBuilder<TItem>> builder, IEnumerable<string> partitionKeyValues, string? etag = null, CancellationToken cancellationToken = default)
+    public ValueTask<string> UpdateAsync(string id, Action<IPatchOperationBuilder<TItem>> builder, IEnumerable<string> partitionKeyValues, string? etag = null, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public ValueTask UpdateAsync(string id, Action<IPatchOperationBuilder<TItem>> builder, PartitionKey partitionKey, string? etag = null, CancellationToken cancellationToken = default)
+    public ValueTask<string> UpdateAsync(string id, Action<IPatchOperationBuilder<TItem>> builder, PartitionKey partitionKey, string? etag = null, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
@@ -103,4 +103,6 @@ internal partial class InMemoryRepository<TItem> : IRepository<TItem>
     {
         throw new NotImplementedException();
     }
+
+
 }
