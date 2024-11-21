@@ -241,7 +241,7 @@ namespace Microsoft.Azure.CosmosRepository.Builders
 
             return attributes.Length is 0
                 ? _namingStrategy.GetPropertyName(propertyInfo.Name, false)
-                : attributes[0].PropertyName;
+                : attributes[0].PropertyName ?? string.Empty;
         }
 
         private string GetPropertyPath(IEnumerable<MemberInfo> propertyInfos)
@@ -257,7 +257,7 @@ namespace Microsoft.Azure.CosmosRepository.Builders
                     ? _namingStrategy.GetPropertyName(propertyInfo.Name, false)
                     : attributes[0].PropertyName;
 
-                propertiesNames.Add(propertyName);
+                propertiesNames.Add(propertyName!);
             }
 
             return string.Join("/", propertiesNames);

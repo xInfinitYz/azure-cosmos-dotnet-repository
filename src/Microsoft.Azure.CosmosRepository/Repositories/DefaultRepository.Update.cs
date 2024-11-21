@@ -72,21 +72,13 @@ internal sealed partial class DefaultRepository<TItem>
     }
 
     //TODO: Write docs
-    public async ValueTask<string> UpdateAsync(string id,
-        IEnumerable<string> partitionKeyValues,
-        Action<IPatchOperationBuilder<TItem>> builder,
-        string? etag = default,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<string> UpdateAsync(string id, Action<IPatchOperationBuilder<TItem>> builder, IEnumerable<string> partitionKeyValues, string? etag = null, CancellationToken cancellationToken = default)
     {
         return await InternalUpdateAsync(id, builder, BuildPartitionKey(partitionKeyValues, id), etag, cancellationToken);
     }
 
     //TODO: Write docs
-    public async ValueTask<string> UpdateAsync(string id,
-        PartitionKey partitionKey,
-        Action<IPatchOperationBuilder<TItem>> builder,
-        string? etag = null,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<string> UpdateAsync(string id, Action<IPatchOperationBuilder<TItem>> builder, PartitionKey partitionKey, string? etag = null, CancellationToken cancellationToken = default)
     {
         return await InternalUpdateAsync(id, builder, partitionKey, etag, cancellationToken);
     }
@@ -111,7 +103,7 @@ internal sealed partial class DefaultRepository<TItem>
             patchItemRequestOptions.IfMatchEtag = etag;
         }
 
-        await container.PatchItemAsync<TItem>(id, partitionKey ?? new PartitionKey(id),
+        var response = await container.PatchItemAsync<TItem>(id, partitionKey ?? new PartitionKey(id),
             patchOperationBuilder.PatchOperations, patchItemRequestOptions, cancellationToken);
 
         return response.ETag;
