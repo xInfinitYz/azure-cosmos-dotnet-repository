@@ -3,8 +3,6 @@
 
 
 // ReSharper disable once CheckNamespace
-using Microsoft.Extensions.Options;
-
 namespace Microsoft.Azure.CosmosRepository;
 
 internal sealed partial class DefaultRepository<TItem>
@@ -120,7 +118,7 @@ internal sealed partial class DefaultRepository<TItem>
 
         var options = new QueryRequestOptions();
 
-        if(partitionKey != default)
+        if (partitionKey != default)
         {
             options.PartitionKey = partitionKey;
         }

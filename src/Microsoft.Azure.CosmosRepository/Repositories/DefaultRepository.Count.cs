@@ -32,7 +32,7 @@ internal sealed partial class DefaultRepository<TItem>
 
     public async ValueTask<int> CountAsync(
         PartitionKey partitionKey,
-     CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
     {
         return await InternalCountAsync(null, partitionKey, cancellationToken);
     }
@@ -48,7 +48,7 @@ internal sealed partial class DefaultRepository<TItem>
 
         QueryRequestOptions options = new();
 
-        if(specification.PartitionKey != null)
+        if (specification.PartitionKey is not null)
         {
             options.PartitionKey = specification.PartitionKey;
         }
@@ -84,7 +84,7 @@ internal sealed partial class DefaultRepository<TItem>
                     requestOptions: requestOptions,
                     linqSerializerOptions: optionsMonitor.CurrentValue.SerializationOptions);
 
-        if(predicate != null)
+        if (predicate is not null)
         {
             query = query.Where(repositoryExpressionProvider.Build(predicate));
         }

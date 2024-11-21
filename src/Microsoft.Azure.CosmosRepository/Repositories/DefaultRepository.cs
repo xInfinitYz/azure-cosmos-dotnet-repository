@@ -2,11 +2,6 @@
 // Licensed under the MIT License.
 
 // ReSharper disable once CheckNamespace
-
-
-
-
-
 namespace Microsoft.Azure.CosmosRepository;
 
 /// <inheritdoc/>
@@ -77,7 +72,7 @@ internal sealed partial class DefaultRepository<TItem>(
     /// <exception cref="ArgumentException">Thrown when the items list is empty.</exception>
     internal static PartitionKey BuildPartitionKey(List<TItem> items)
     {
-        if (items.Count == 0)
+        if (items.Count is 0)
         {
             throw new ArgumentException(
                 "Unable to perform batch operation with no items",
@@ -97,15 +92,23 @@ internal sealed partial class DefaultRepository<TItem>(
     internal static PartitionKey BuildPartitionKey(IEnumerable<string> values, string? defaultValue = null)
     {
         var builder = new PartitionKeyBuilder();
-        if (values == null || !values.Any())
+        var keys = values?.ToList();
+        if (keys is null or { Count: 0 })
         {
-            return !string.IsNullOrEmpty(defaultValue) ? new PartitionKey(defaultValue) : default;
+            return !string.IsNullOrWhiteSpace(defaultValue)
+                ? new PartitionKey(defaultValue)
+                : default;
         }
 
-        if (values.Count() > 3) throw new ArgumentException("Unable to build partition key. The max allowed partition key values is 3", nameof(values));
+        if (keys?.Count > 3)
+        {
+            throw new ArgumentException(
+                "Unable to build partition key. The max allowed number of partition key values is 3.", 
+                nameof(values));
+        }
 
 
-        foreach (var value in values)
+        foreach (var value in values!)
         {
             builder.Add(value);
         }
@@ -120,7 +123,10 @@ internal sealed partial class DefaultRepository<TItem>(
     /// <returns>A PartitionKey object constructed from the provided string value.</returns>
     internal static PartitionKey BuildPartitionKey(string? value, string? defaultValue = null)
     {
-        if ((value == null || string.IsNullOrWhiteSpace(value)) && !string.IsNullOrWhiteSpace(value)) return new PartitionKey(defaultValue);
+        if (string.IsNullOrWhiteSpace(value) && !string.IsNullOrWhiteSpace(defaultValue))
+        {
+            return new PartitionKey(defaultValue);
+        }
         return new PartitionKey(value);
     }
 
@@ -133,7 +139,7 @@ internal sealed partial class DefaultRepository<TItem>(
     /// <exception cref="ArgumentException">Thrown when the provided item is null.</exception>
     internal static PartitionKey BuildPartitionKey(TItem item)
     {
-        if (item == null)
+        if (item is null)
         {
             throw new ArgumentException(
                 "Unable to perform operation with null item",
